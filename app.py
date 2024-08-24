@@ -7,7 +7,7 @@ def index():
     return render_template('index.html')
 
 # Directory where your music files are stored
-MUSIC_DIR = "C:/Users/Lenovo/Music/AAC"
+MUSIC_DIR = os.path.join(app.root_path, 'static/songs')
 
 # Endpoint to list all available songs
 @app.route('/songs', methods=['GET'])
