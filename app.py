@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify,render_template
 from flask_sqlalchemy import SQLAlchemy
 import cloudinary
+import cloudinary.api
 import cloudinary.uploader
 
 # Initialize Flask application
