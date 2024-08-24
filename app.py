@@ -6,6 +6,10 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/check')
+def chk():
+    return "maro rohit ki"
+
 # Directory where your music files are stored
 MUSIC_DIR = os.path.join(app.root_path, 'static/songs')
 
