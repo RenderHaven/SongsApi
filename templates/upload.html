@@ -4,14 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Song</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="text"], input[type="file"] {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <h1>Upload a New Song</h1>
     <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="title">Song Title:</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="artist">Artist:</label>
+        <input type="text" id="artist" name="artist" required>
+
         <label for="file">Choose a song to upload:</label>
         <input type="file" id="file" name="file" accept="audio/*" required>
+
         <button type="submit">Upload</button>
     </form>
-    <a href="/songs-list">View Songs List</a>
+    <a href="/songs_list">View Songs List</a>
 </body>
 </html>

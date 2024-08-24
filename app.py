@@ -1,131 +1,116 @@
-from flask import Flask, render_template,jsonify,send_from_directory,abort,request
-from supabase import create_client, Client
+from flask import Flask, request, jsonify,render_template
+from flask_sqlalchemy import SQLAlchemy
+import cloudinary
+import cloudinary.uploader
 
-supabase_url="https://pnimkcozraghtqqxynly.supabase.co"
-anon_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuaW1rY296cmFnaHRxcXh5bmx5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNDUxODUwOCwiZXhwIjoyMDQwMDk0NTA4fQ.h1tA9BepiInamSfxw6JioHpdYTXRgk_Wnbcm69UefqY"
+# Initialize Flask application
 app = Flask(__name__)
 
-supabase: Client = create_client(supabase_url, anon_key)
+# Configure the database (using PostgreSQL as an example)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize SQLAlchemy
+db = SQLAlchemy(app)
+
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name='dimdoq0ng',
+    api_key='324659127373814',
+    api_secret='eUTC_Jxfvw95dkaCDN7yHEomugE'
+)
+
+# Define the Song model
+class Song(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    artist = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.String(500), nullable=False)
+
+    def __repr__(self):
+        return f'<Song {self.title} by {self.artist}>'
+
+# Create the database tables
+with app.app_context():
+    db.create_all()
+
 
 @app.route('/')
-def index():
-    return render_template('index.html')
+def home():
+    return render_template("index.html")
 
-@app.route('/check')
-def chk():
-    return "maro rohit ki"
+@app.route('/up')
+def up():
+    return render_template("upload.html")
 
-@app.route('/upload')
-def upload():
-    return render_template('upload.html')
-@app.route('/test-connection')
-def test_connection():
+@app.route('/refresh', methods=['GET'])
+def refresh_songs():
     try:
-        response = supabase.table("SongsTable").select("*").execute()
-        data = response.data
-        return jsonify(data), 200
+        # List all files in Cloudinary
+        resources = cloudinary.api.resources(resource_type="video")['resources']
+        
+        # Get the URLs of the files already in the database
+        existing_urls = {song.url for song in Song.query.all()}
+        
+        # Iterate through Cloudinary resources and add new ones to the database
+        new_songs = []
+        for resource in resources:
+            file_url = resource['url']
+            file_name = resource['public_id'].split('/')[-1]  # Extract filename from public_id
+            
+            if file_url not in existing_urls:
+                new_song = Song(title=file_name, artist='NA', url=file_url)
+                db.session.add(new_song)
+                new_songs.append(new_song)
+        
+        db.session.commit()
+
+        return jsonify({'message': f'{len(new_songs)} new songs added successfully!'}), 201
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/list-buckets')
-def list_buckets():
-    try:
-        # List all buckets
-        buckets = supabase.storage.list_buckets()
-        # Return the bucket names
-        return jsonify(buckets), 200
+@app.route('/upload', methods=['POST'])
+def upload_song():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
     
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-    
-@app.route('/refresh')
-def insert_or_update_song_metadata():
-    # Define the bucket name
-    bucket_name = 'Songs'
-    
-    try:
-        # Access the bucket
-        bucket = supabase.storage.get_bucket(bucket_name)
-        
-        # List files in the bucket
-        files = bucket.list()
-        
-        
-        # files = files_response.data
-        
-        # Iterate through files and insert/update metadata
-        print(files)
-        for file in files:
-            file_name = file['name']
-            
-            # Extract metadata from file name or use placeholder values
-            title = file_name.split('.')[0]  # Placeholder for title
-            artist = 'Unknown'  # Placeholder for artist
-            print(title)
+    file = request.files['file']
+    title = request.form.get('title')
+    artist = request.form.get('artist')
 
-            file_url = bucket.get_public_url(file['name'])
-            # Check if song already exists in the database
-            response = supabase.table('SongsTable').select('*').eq('url', file_url).execute()
-            
-            # # Check for errors in the response
-            # if response.error:
-            #     return jsonify({'error': response.error}), 500
-            
-            response_data = response.data
-            
-            if response_data:
-                # Update existing record
-                song_id = response_data[0]['id']
-                update_response = supabase.table('SongsTable').update({
-                    'title': title,
-                    'artist': artist
-                }).eq('id', song_id).execute()
-            else:
-                # Insert new record
-                insert_response = supabase.table('SongsTable').insert({
-                    'title': title,
-                    'artist': artist,
-                    'url': file_url
-                }).execute()
-                
-                # Check for errors in insert response
-                # if insert_response.error:
-                #     return jsonify({'error': insert_response.error}), 500
-        return jsonify({"message": "Metadata updated successfully!"}), 200
+    if not title or not artist:
+        return jsonify({'error': 'Title and artist are required'}), 400
+    
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
 
-    except Exception as e:
-        # logging.error(f"Error: {e}")
-        return jsonify({'error': str(e)}), 500
+    # Upload the song file to Cloudinary
+    result = cloudinary.uploader.upload(file, resource_type="video")
+    file_url = result['url']
+
+    # Store the metadata in the database
+    new_song = Song(title=title, artist=artist, url=file_url)
+    db.session.add(new_song)
+    db.session.commit()
+
+    return jsonify({'message': 'Song uploaded successfully!', 'url': file_url}), 201
 
 
-    
-@app.route('/songs')
-def songs_list():
-    try:
-        # Fetch songs data from Supabase
-        response = supabase.table('SongsTable').select('title, artist, url').execute()
-        
-        # Check for errors in the response
-        if not response:
-            return jsonify({'error'}), 500
-        
-        songs = response.data
-        # Render the template with the song data
-        return render_template('list_songs.html', songs=songs)
-    
-    except Exception as e:
-        # logging.error(f"Error: {e}")
-        return jsonify({'error': str(e)}), 500
+@app.route('/songs_list', methods=['GET'])
+def list_songs():
+    songs = Song.query.all()
+    songs_data = [{'title': song.title, 'artist': song.artist, 'url': song.url} for song in songs]
+    return render_template("list_songs.html",songs=songs_data)
 
 @app.route('/songs/<int:id>', methods=['GET'])
 def get_song(id):
-    response = supabase.table('SongsTable').select('*').eq('id', id).execute()
-    # return jsonify(response.data)
-    if response and response.data:
-        return jsonify(response.data[0]['url']), 200
-    else:
-        return jsonify({'error': 'Song not found'}), 404
+    song = Song.query.get_or_404(id)
+    return jsonify({
+        'title': song.title,
+        'artist': song.artist,
+        'url': song.url
+    }), 200
 
 
 if __name__ == '__main__':
