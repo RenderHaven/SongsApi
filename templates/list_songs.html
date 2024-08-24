@@ -3,21 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song List</title>
+    <title>Song Lists</title>
+    <link rel="icon" href="/static/images/logo.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Exo:400,700" rel="stylesheet">
 </head>
 <body>
-    <h1>Available Songs</h1>
-    <ul>
-        {% for song in songs %}
-        <li>
-            <strong>Title:</strong> {{ song.title }}<br>
-            <strong>Artist:</strong> {{ song.artist }}<br>
-            <audio controls>
-                <source src="{{ song.url }}" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
-        </li>
-        {% endfor %}
-    </ul>
+    <div class="context">
+        <h2>Available Songs</h2>
+        <ul>
+            {% for song in songs %}
+            <li>
+                <strong style="color: black;">Title :  {{ song.title }}</strong><br>
+                <strong style="color: black;">Artist : {{ song.artist }}</strong><br>
+                <audio controls>
+                    <source src="{{ song.url }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>

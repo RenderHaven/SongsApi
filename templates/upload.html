@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Song</title>
+    <link rel="icon" href="/static/images/logo.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Exo:400,700" rel="stylesheet">
     <style>
-        body {
+        /* body {
             font-family: Arial, sans-serif;
             margin: 20px;
-        }
+        } */
         form {
             margin-top: 20px;
         }
@@ -42,19 +45,37 @@
     </style>
 </head>
 <body>
-    <h1>Upload a New Song</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <label for="title">Song Title:</label>
-        <input type="text" id="title" name="title" required>
+    <div class="area">
+        <div class="circles">
+            <ul>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+    <div class="context">
+        <h1>Upload A New Song</h1>
+        <form action="/cloudupload" method="post" enctype="multipart/form-data">
+            <label for="title">Song Title:</label>
+            <input type="text" id="title" name="title" required>
 
-        <label for="artist">Artist:</label>
-        <input type="text" id="artist" name="artist" required>
+            <label for="artist">Artist:</label>
+            <input type="text" id="artist" name="artist" required>
 
-        <label for="file">Choose a song to upload:</label>
-        <input type="file" id="file" name="file" accept="audio/*" required>
+            <label for="file">Choose a song to upload:</label>
+            <input type="file" id="file" name="file" accept="audio/*" required>
 
-        <button type="submit">Upload</button>
-    </form>
-    <a href="/songs_list">View Songs List</a>
+            <button type="submit">Upload</button>
+        </form>
+        <a href="/songs_list">View Songs List</a>
+    </div>
 </body>
 </html>

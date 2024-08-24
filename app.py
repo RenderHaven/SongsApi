@@ -40,7 +40,7 @@ with app.app_context():
 def home():
     return render_template("index.html")
 
-@app.route('/up')
+@app.route('/upload')
 def up():
     return render_template("upload.html")
 
@@ -71,7 +71,7 @@ def refresh_songs():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/upload', methods=['POST'])
+@app.route('/cloudupload', methods=['POST'])
 def upload_song():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400

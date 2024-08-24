@@ -23,6 +23,11 @@ body {
     color: #fefefe;
     font-size: 150px;
 }
+.context h2 {
+    text-align: center;
+    color: #090909;
+    font-size: 150px;
+}
 
 .context h3 {
     text-align: center;
@@ -135,7 +140,25 @@ body {
     animation-delay: 0s;
     animation-duration: 11s;
 }
+.buttons {
+    margin-top: 20px;
+    text-align: center;
+}
 
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px 48px; /* Increased padding */
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 24px; /* Increased font size */
+    border-radius: 10px; /* Optional: makes buttons look smoother */
+}
+
+button:hover {
+    background-color: #45a049;
+}
 
 
 @keyframes animate {
