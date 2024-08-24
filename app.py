@@ -6,9 +6,27 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/hii')
-def hii():
-    return "land le le rohit"
+# Directory where your music files are stored
+MUSIC_DIR = "C:/Users/Lenovo/Music/AAC"
+
+# Endpoint to list all available songs
+@app.route('/songs', methods=['GET'])
+def list_songs():
+    try:
+        # List all the files in the music directory
+        songs = [f for f in os.listdir(MUSIC_DIR) if os.path.isfile(os.path.join(MUSIC_DIR, f))]
+        return jsonify(songs)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Endpoint to serve a specific song file
+@app.route('/songs/<filename>', methods=['GET'])
+def serve_song(filename):
+    try:
+        return send_from_directory(MUSIC_DIR, filename)
+    except FileNotFoundError:
+        abort(404, description="Song not found")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
